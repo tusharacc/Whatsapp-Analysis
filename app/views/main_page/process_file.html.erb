@@ -1,0 +1,45 @@
+<script>
+    $(document).ready(function(){
+        $('#submit').click(function(){
+            $.ajax({
+                url: "<%= update_message_list_path %>",
+                data: {
+                    name = $('#list_of_members:selected').text();
+                    from_dt = $('#from_date').text();
+                    to_dt = $('#to_date').text();
+                },
+                dataType="script"
+            });
+            
+        });
+    });
+</script>
+
+<div id="container">
+    <h1 class="text-primary text-center">What's Up</h1>
+ 
+    
+    <p>Your Cookie is :</p><span><%= cookies[:name]%></span>
+    <br/><br/>
+    
+    <div id="line-example"></div>
+    
+    <%= form_tag '/greetings/update_message_list',remote: true, class: "form-inline",method: :get do %>
+        <div class="form-control" >
+            <%= select_tag "people", options_for_select(@member_name.push("All")) %>
+            <%= date_field_tag 'from-date',id:'from_date' %>
+            <%= date_field_tag 'to-date', id:'to_date' %>
+        </div>
+        <%= submit_tag 'Process',  class:"btn btn-primary",id:"submit" %>
+    <%end%>
+    
+    <br/>
+    <div id="error-message">
+        
+    </div>
+    <div id="message_list">
+        <h1>Message List</h1>
+    </div>
+
+</div>
+

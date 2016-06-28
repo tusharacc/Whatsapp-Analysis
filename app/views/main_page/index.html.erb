@@ -1,0 +1,11 @@
+<div class="container">
+   <h1 class="text-center"><kbd>WhatsApp Analysis</kbd></h1>
+  
+   <%= form_tag '/main_page/process_file' ,multipart: true, class: "form-inline" do %>
+      <div class="form-group">
+        <label for="file" class="btn btn-primary">File to Upload</label> 
+        <%= file_field_tag "file", type: "hidden" %>
+        <div class="btn btn-primary"><%= submit_tag 'Process' %></div>
+      </div>
+   <% end %>
+</div>

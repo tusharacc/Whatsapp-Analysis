@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+
+  get "main_page/update_message_list" => 'main_page#update_message_list', as: 'update_message_list'
+  post 'main_page/process_file'
+  get 'main_page/process_file' => 'main_page#process_file'
+  root "main_page#index"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
