@@ -71,6 +71,7 @@ class MainPageController < ApplicationController
 	      end
 	      line_cnt += 1
 	    end
+
 	    logger.debug "The number of lines in specific is #{@specific_lines.count}"
 	    logger.debug "The number of lines in specific is #{@regular_chat.count}"
 	    logger.debug "The cookie data is #{cookies[:name]}"
@@ -84,5 +85,29 @@ class MainPageController < ApplicationController
       		format.js 
       		format.html
     	end
+  	end
+
+  	private
+
+  	def get_media_omitted
+  		count = 0
+  		@specific_lines.each do |line|
+  			line_split = line.scan(/(\d+\/\d+\/\d+),\s(\d+:\d+\s\w+)\s-\s(.*$)/)
+  			if line_split[0][-1] == '<Media omitted>'
+				count++
+			end
+  		end
+  	end
+
+  	def get_members_added
+  		count = 0
+  		@specific_lines.each do |line|
+  			line_split = line.scan(/(\d+\/\d+\/\d+),\s(\d+:\d+\s\w+)\s-\s(.*$)/)
+  			if (line_split[0].count == 3
+  				if line_split[0][-1].index('added') > 0
+					count++
+				end
+			end
+  		end
   	end
 end

@@ -1,6 +1,7 @@
 <script>
     $(document).ready(function(){
         $('#submit').click(function(){
+            $('#whatsappdata').css("display", "inline");
             $.ajax({
                 url: "<%= update_message_list_path %>",
                 data: {
@@ -16,30 +17,45 @@
 </script>
 
 <div id="container">
-    <h1 class="text-primary text-center">What's Up</h1>
+    <h1 class="text-primary text-center">Choose whom you want to see</h1>
  
-    
-    <p>Your Cookie is :</p><span><%= cookies[:name]%></span>
-    <br/><br/>
-    
-    <div id="line-example"></div>
-    
-    <%= form_tag '/greetings/update_message_list',remote: true, class: "form-inline",method: :get do %>
-        <div class="form-control" >
-            <%= select_tag "people", options_for_select(@member_name.push("All")) %>
-            <%= date_field_tag 'from-date',id:'from_date' %>
-            <%= date_field_tag 'to-date', id:'to_date' %>
-        </div>
-        <%= submit_tag 'Process',  class:"btn btn-primary",id:"submit" %>
-    <%end%>
-    
     <br/>
-    <div id="error-message">
-        
+    <br/>
+
+    <div class="well well-lg" style="margin: 0 20% 0 20%;">
+        <p class="text-primary">
+            Welcome friend, we are now a step away from getting the details.
+            You can select a particular member of the group or all, based on your selection
+            graphs will be generated
+        </p>
     </div>
-    <div id="message_list">
-        <h1>Message List</h1>
+    
+    <div style="margin-top:20px">
+        <%= form_tag '/main_page/update_message_list',remote: true, class: "form-horizontal",method: :get do %>
+            <div class="form-group" >
+                <%= select_tag "people",options_for_select(@member_name.push("All")),class:"form-control col-md-2" %>
+                <%= date_field_tag 'from-date',id:'from_date',class:"form-control col-md-2" %>
+                <%= date_field_tag 'to-date', id:'to_date',class:"form-control col-md-2" %>
+            </div>
+            <%= submit_tag 'Get Me Data',  class:"btn btn-primary",id:"submit" %>
+        <%end%>
+    <div>
+    <br/>
+
+    <div id="whatsappdata" style="display:none;">
+        <div id="text-data" class="jumbotron">
+            <ul class="list-group">
+                <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Messages Sent</li>
+                <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Media Sent</li> 
+                <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Number of times left group</li> 
+                <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Number of times changed group pic</li> 
+                <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Number of times changed group name</li> 
+                <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Number of members added</li>
+            </ul>
+        </div>
+
     </div>
+
 
 </div>
 
