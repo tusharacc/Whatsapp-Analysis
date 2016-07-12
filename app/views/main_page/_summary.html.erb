@@ -1,0 +1,11 @@
+
+    <ul class="list-group">
+        <% if @media_added != nil %>
+            <li class="list-group-item"><span class="badge"><%= @media_added %></span> Total Media Sent</li> 
+        <% end %>
+        <% if @members_added != nil %>
+            <li class="list-group-item"><span class="badge"><%= @members_added %></span> Total Number of members added</li>
+        <% end %>
+    </ul>
+
+    <%= content_tag :div,"",id:"message-by-each",data:{messages:@messages} %>

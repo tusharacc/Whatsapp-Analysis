@@ -30,32 +30,46 @@
         </p>
     </div>
     
-    <div style="margin-top:20px">
-        <%= form_tag '/main_page/update_message_list',remote: true, class: "form-horizontal",method: :get do %>
-            <div class="form-group" >
-                <%= select_tag "people",options_for_select(@member_name.push("All")),class:"form-control col-md-2" %>
-                <%= date_field_tag 'from-date',id:'from_date',class:"form-control col-md-2" %>
-                <%= date_field_tag 'to-date', id:'to_date',class:"form-control col-md-2" %>
-            </div>
-            <%= submit_tag 'Get Me Data',  class:"btn btn-primary",id:"submit" %>
-        <%end%>
-    <div>
-    <br/>
+    <div class="well well-lg" style="margin:20px 20% 0 20%">
+        <div>
+            <%= form_tag '/main_page/update_message_list',remote: true, class: "form-inline",role:"form",method: :get do %>
+                <div class="form-group" >
+                    <%= select_tag "people",options_for_select(@member_name.push("All")),class:"form-control" %>
+                </div>
+                <div class="form-group" >
+                    <label for="from-dt">From Date:</label>
+                    <%= date_field_tag 'from-date',id:'from_date',class:"form-control" %>
+                </div>
+                <div class="form-group" >
+                    <label for="to-dt">To Date:</label>
+                    <%= date_field_tag 'to-date', id:'to_date',class:"form-control" %>
+                </div>
+                <%= submit_tag 'Get Me Data',  class:"btn btn-primary",id:"submit",style:"margin-top:20px;margin-left:40%;" %>
+            <%end%>
+        <div>
+    </div>
+    
 
-    <div id="whatsappdata" style="display:none;">
-        <div id="text-data" class="jumbotron">
+    <div id="whatsappdata" style="display:none;margin:20px 20% 0 20%;">
+        <div id="text-data" >
             <ul class="list-group">
                 <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Messages Sent</li>
-                <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Media Sent</li> 
+                <%  @media_added ||= 0 %>
+                <li class="list-group-item "><span class="badge" id="media-added"><%= @media_added %></span> Total Media Sent</li> 
+             
                 <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Number of times left group</li> 
                 <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Number of times changed group pic</li> 
                 <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Number of times changed group name</li> 
-                <li class="list-group-item"><span class="badge"><%= @regular_chat.count %></span> Total Number of members added</li>
+                <% @members_added ||= 0 %>
+                <li class="list-group-item "><span class="badge" id="members-added"><%= @members_added %></span> Total Number of members added</li>
+                
             </ul>
         </div>
 
     </div>
 
+    <!--<div id="message-by-each" style="display:none;margin-top:20px;"></div>-->
+    
 
 </div>
 
