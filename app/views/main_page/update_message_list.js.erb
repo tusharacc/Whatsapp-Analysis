@@ -2,3 +2,20 @@ $('#media-added').text('<%= @media_added %>');
 $('#members-added').text('<%= @members_added %>');
 $('#whatsappdata').css('display','inline');
 $('#message-by-each').css('display','inline');
+$('#rendering_partial').html("<%= j render(:partial => 'main_page/summary') %>");
+
+Morris.Bar({
+  element: 'message-by-each',
+  data: $('#message-by-each').data('messages'),
+  xkey: 'name',
+  ykeys: ['count'],
+  labels: ['Message Count by each member']
+});
+
+Morris.Bar({
+  element: 'message-by-day',
+  data: $('#message-by-day').data('messages-per-day'),
+  xkey: 'day',
+  ykeys: ['count'],
+  labels: ['Message Count per day']
+});
