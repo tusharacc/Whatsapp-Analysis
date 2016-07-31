@@ -10,8 +10,8 @@ class MainPageController < ApplicationController
 		cookies[:user_name] = SecureRandom.hex
         session[:file_name] = SecureRandom.hex
 
-        logger.debug "The number cookie generated is #{cookies[:user_name]}"
-        logger.debug "The number session generated is #{session[:file_name]}"
+        #logger.debug "The number cookie generated is #{cookies[:user_name]}"
+        #logger.debug "The number session generated is #{session[:file_name]}"
     end
 
     def process_file
@@ -67,8 +67,15 @@ class MainPageController < ApplicationController
 	          		end
 	        	end
 	      	end
+#
+#CHANGE THE SLICE LINE FOR DATES
+#	      	
 	      	if line_cnt == 0
-	        	@earliest_date = date_of_sent_text
+	      		if date_of_sent_text == ''
+	      			@earliest_date = line.slice(0,9)
+	      		else
+	      			@earliest_date = date_of_sent_text
+	      		end
 	      	else
 	        	@last_date = date_of_sent_text
 	      	end
@@ -83,18 +90,24 @@ class MainPageController < ApplicationController
     		@specific_lines.each {|line| file.write(line)}	
   		end
 
-	    logger.debug "The number of lines in specific is #{@specific_lines.count}"
-	    logger.debug "The number of lines in specific is #{@regular_chat.count}"
-	    logger.debug "The cookie data is #{cookies[:name]}"
-	    logger.debug "The session data is #{session[:file_name]}"
+	    #logger.debug "The number of lines in specific is #{@specific_lines.count}"
+	    #logger.debug "The number of lines in specific is #{@regular_chat.count}"
+	    #logger.debug "The cookie data is #{cookies[:name]}"
+	    #logger.debug "The session data is #{session[:file_name]}"
 	end
 
 	def update_message_list
-    	get_count_per_member
-		logger.debug "The message summary is #{@messages}"
-		get_average_per_day
-    	get_media_omitted
-    	get_members_added
+		people = params['people']
+		from_dt = params['from-date']
+		to_dt = params['to-date']
+		if people == 'All'
+	    	get_count_per_member
+			get_average_per_day
+			get_average_per_time_slot(from_dt,to_dt)
+			get_per_month
+	    	get_media_omitted
+	    	get_members_added
+	    end
     	respond_to do |format|
       		format.js 
       		format.html
@@ -102,34 +115,118 @@ class MainPageController < ApplicationController
   	end
 
   	#private
+  	def get_average_per_time_slot(from_dt,to_dt,*name)
+  		@time_slot = [{'slot'=>'12:01-4:00 AM','count'=>0},{'slot'=>'4:01-8:00 AM','count'=>0},{'slot'=>'8:01-12:00 PM','count'=>0},{'slot'=>'12:01-4:00 PM','count'=>0},{'slot'=>'4:01-8:00 PM','count'=>0},{'slot'=>'8:01-12:00 AM','count'=>0}]
 
-  	def get_count_per_member
+  		file = File.read(Rails.root.join('public', 'uploads', session[:file_name]+'_regular.json'))
+    	text_hash = JSON.parse(file)
+    	text_hash.each do |hsh|
+    		time = hsh['time']
+    		read_from_dt = Date.strptime(hsh['date'],'%m/%d/%Y').to_s
+    		hour = time.scan(/(.+):.+\s(\S+)/)[0][0].to_f
+    		am_pm = time.scan(/(.+):.+\s(\S+)/)[0][1]
+
+    		if from_dt <= read_from_dt and to_dt >= read_from_dt
+	    		if am_pm == 'PM'
+	    			hour = hour + 12.0
+	    		end
+	    		index = hour/4.0
+	    		if index > 0 and index <=1.0
+	    			@time_slot[0]['count'] += 1
+	    		elsif index > 1.0 and index <=2.0
+	    			@time_slot[1]['count'] += 1
+	    		elsif index > 2.0 and index <=3.0
+	    			@time_slot[2]['count'] += 1
+	    		elsif index > 3.0 and index <=4.0
+	    			@time_slot[3]['count'] += 1
+	    		elsif index > 4.0 and index <=5.0
+	    			@time_slot[4]['count'] += 1
+	    		elsif index > 5.0 and index <=6.0
+	    			@time_slot[5]['count'] += 1
+	    		end
+	    	end
+    	end
+  	end
+
+  	def get_per_month(from_dt,to_dt,*name)
+  		@messages_per_month = [{'month'=>'January','count'=>0},{'month'=>'February','count'=>0},{'month'=>'March','count'=>0},{'month'=>'April','count'=>0},{'month'=>'May','count'=>0},{'month'=>'June','count'=>0},{'month'=>'July','count'=>0},{'month'=>'August','count'=>0},{'month'=>'September','count'=>0},{'month'=>'October','count'=>0},{'month'=>'November','count'=>0},{'month'=>'December','count'=>0}]
+  		file = File.read(Rails.root.join('public', 'uploads', session[:file_name]+'_regular.json'))
+    	text_hash = JSON.parse(file)
+
+    	latest_date = Date.strptime(text_hash[0]['date'],'%m/%d/%Y')
+    	oldest_date = Date.strptime(text_hash[-1]['date'],'%m/%d/%Y')
+    	#logger.debug "The oldest date  #{latest_date}"
+    	#logger.debug "The oldest date  #{oldest_date}"
+    	text_hash.each do |text|
+    		read_from_dt = Date.strptime(hsh['date'],'%m/%d/%Y').to_s
+
+    		if from_dt <= read_from_dt and to_dt >= read_from_dt
+				message_month = Date.strptime(read_from_dt, '%m/%d/%Y').mon 
+	    		#logger.debug "The oldest date  #{message_month}"
+	    		case message_month
+	    		when 1
+	    			@messages_per_month[0]['count'] += 1
+	    		when 2
+	    			@messages_per_month[1]['count'] += 1
+	    		when 3
+	    			@messages_per_month[2]['count'] += 1
+	    		when 4
+	    			@messages_per_month[3]['count'] += 1
+	    		when 5
+	    			@messages_per_month[4]['count'] += 1
+	    		when 6
+	    			@messages_per_month[5]['count'] += 1
+	    		when 7
+	    			@messages_per_month[6]['count'] += 1
+	    		when 8
+	    			@messages_per_month[7]['count'] += 1
+	    		when 9
+	    			@messages_per_month[8]['count'] += 1
+	    		when 10
+	    			@messages_per_month[9]['count'] += 1
+	    		when 11
+	    			@messages_per_month[10]['count'] += 1
+	    		when 12
+	    			@messages_per_month[11]['count'] += 1
+	    		else
+	    			logger.debug "the process failed in month section #{date}"
+	    		end
+	    	end
+    	end
+    	logger.debug "The number of messages per month  #{@messages_per_month}"
+  	end
+  	
+  	def get_count_per_member(from_dt,to_dt,*name)
   		@messages = []
     	#logger.debug "the file name is #{{}}"
     	file = File.read(Rails.root.join('public', 'uploads', session[:file_name]+'_regular.json'))
     	text_hash = JSON.parse(file)
 
 		text_hash.each do |hsh|
-			name = hsh['name']
-			not_found = true
-			a = 0
-			@messages.each do |rec|
-			
-				if rec['name'] == name
-					not_found = false
-					#puts rec
-					@messages[a]['count'] = rec['count'] + 1
+			read_from_dt = Date.strptime(hsh['date'],'%m/%d/%Y').to_s
+
+			if from_dt <= read_from_dt and to_dt >= read_from_dt
+				name = hsh['name']
+				not_found = true
+				a = 0
+				@messages.each do |rec|
+				
+					if rec['name'] == name
+						not_found = false
+						#puts rec
+						@messages[a]['count'] = rec['count'] + 1
+					end
+						a += 1
 				end
-					a += 1
-			end
-			if not_found
-				@messages.push({'name'=>name,'count'=>1})
+				if not_found
+					@messages.push({'name'=>name,'count'=>1})
+				end
 			end
 		end
 
   	end
 
-  	def get_average_per_day
+  	def get_average_per_day(from_dt,to_dt,*name)
   		dt = ''
   		@messages_per_day = []
   		day_map = {"1"=>"Monday","2"=>"Tuesday","3"=>"Wednesday","4"=>"Thursday","5"=>"Friday","6"=>"Saturday","7"=>"Sunday"}
@@ -137,20 +234,23 @@ class MainPageController < ApplicationController
     	text_hash = JSON.parse(file)
     	latest_date = Date.strptime(text_hash[0]['date'],'%m/%d/%Y')
     	text_hash.each do |hsh|
-    		logger.debug "the hsh is #{hsh}"
-			dt = hsh['date']
-			day_num = Date.strptime(dt, '%m/%d/%Y').cwday 
-			not_found = true
-			a = 0
-			@messages_per_day.each do |rec|
-				if rec['day'] == day_map[day_num.to_s]
-					not_found = false
-					@messages_per_day[a]['count'] = rec['count'] + 1
+    		#logger.debug "the hsh is #{hsh}"
+			read_from_dt = Date.strptime(hsh['date'],'%m/%d/%Y').to_s
+
+			if from_dt <= read_from_dt and to_dt >= read_from_dt
+				day_num = Date.strptime(hsh['date'], '%m/%d/%Y').cwday 
+				not_found = true
+				a = 0
+				@messages_per_day.each do |rec|
+					if rec['day'] == day_map[day_num.to_s]
+						not_found = false
+						@messages_per_day[a]['count'] = rec['count'] + 1
+					end
+					a += 1
 				end
-				a += 1
-			end
-			if not_found
-				@messages_per_day.push({'day'=>day_map[day_num.to_s],'count'=>1})
+				if not_found
+					@messages_per_day.push({'day'=>day_map[day_num.to_s],'count'=>1})
+				end
 			end
 			
     	end
@@ -163,12 +263,12 @@ class MainPageController < ApplicationController
     		end
     	end
 
-    	logger.debug "the number of messages per day is #{day_count}"
-    	logger.debug "the number of messages per day is #{@messages_per_day}"
+    	#logger.debug "the number of messages per day is #{day_count}"
+    	#logger.debug "the number of messages per day is #{@messages_per_day}"
     	
-    	@messages_per_day.each_with_index do |val,index| 
-    		@messages_per_day[index]['count'] = @messages_per_day[index]['count']/day_count[@messages_per_day[index]['day']]  
-    	end
+    	#@messages_per_day.each_with_index do |val,index| 
+    	#	@messages_per_day[index]['count'] = @messages_per_day[index]['count']/day_count[@messages_per_day[index]['day']]  
+    	#end
 
   	end
 

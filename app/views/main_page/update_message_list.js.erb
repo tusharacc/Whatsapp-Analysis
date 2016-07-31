@@ -19,3 +19,19 @@ Morris.Bar({
   ykeys: ['count'],
   labels: ['Message Count per day']
 });
+
+Morris.Bar({
+  element: 'message-by-time-slot',
+  data: $('#message-by-time-slot').data('messages-per-time-slot'),
+  xkey: 'slot',
+  ykeys: ['count'],
+  labels: ['Message Count per time slot']
+});
+
+Morris.Bar({
+  element: 'message-by-month',
+  data: $('#message-by-month').data('messages-per-month'),
+  xkey: 'month',
+  ykeys: ['count'],
+  labels: ['Message Count per month']
+});
