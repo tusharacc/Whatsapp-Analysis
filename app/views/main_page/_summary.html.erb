@@ -1,7 +1,13 @@
-
-
-    <%= content_tag :div,"",id:"message-by-each",data:{messages:@messages} %>
-    <%= content_tag :div,"",id:"message-by-day",data:{messages_per_day:@messages_per_day} %>
-    <%= content_tag :div,"",id:"message-by-time-slot",data:{messages_per_time_slot:@time_slot} %>
-    <%= content_tag :div,"",id:"message-by-month",data:{messages_per_month:@messages_per_month} %>
-
+<div id="text-data" class="well well-lg" style="margin:20px 20% 0 20%" >
+    <ul class="list-group">
+        <li class="list-group-item"><span class="badge"><%= @chat_count%></span> Total Messages Sent</li>
+        <%  @media_added ||= 0 %>
+        <li class="list-group-item "><span class="badge" id="media-added"><%= @media_added %></span> Total Media Sent</li> 
+     
+        <li class="list-group-item"><span class="badge"><%= @group_left %></span> Total Number of times left group</li> 
+        <li class="list-group-item"><span class="badge"><%= @group_pic_changed %></span> Total Number of times changed group pic</li> 
+        <li class="list-group-item"><span class="badge"><%= @group_name_changed %></span> Total Number of times changed group name</li> 
+        <% @members_added ||= 0 %>
+        <li class="list-group-item "><span class="badge" id="members-added"><%= @members_added %></span> Total Number of members added</li>   
+    </ul>
+</div>

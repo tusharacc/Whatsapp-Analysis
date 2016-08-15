@@ -4,9 +4,9 @@
 	   <%= form_tag '/main_page/process_file' ,multipart: true, class: "form-horizontal" do %>
 	      <div class="form-group">
 	      	<label class="control-label col-md-2"></label>
-	        <%= file_field_tag "file", type: "hidden",class: "btn btn-primary control-label col-md-4"  %>
+	        <%= file_field_tag "file",id:"file_tag", type: "hidden",class: "btn btn-primary control-label col-md-4"  %>
 	        <label class="control-label col-md-2"></label>
-	        <%= submit_tag 'Process',class: "btn btn-primary control-label col-md-2" %>
+	        <%= submit_tag 'Process',id:"submit_tag",class: "btn btn-primary control-label col-md-2" %>
 	        <label class="control-label col-md-2"></label>
 	      </div>
 	   <% end %>

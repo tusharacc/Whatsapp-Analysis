@@ -1,23 +1,31 @@
-$('#media-added').text('<%= @media_added %>');
-$('#members-added').text('<%= @members_added %>');
+//$('#media-added').text('<%= @media_added %>');
+//$('#members-added').text('<%= @members_added %>');
 $('#whatsappdata').css('display','inline');
-$('#message-by-each').css('display','inline');
-$('#rendering_partial').html("<%= j render(:partial => 'main_page/summary') %>");
+//$('#message-by-each').css('display','inline');
+$('#whatsappdata').html("<%= j render(:partial => 'main_page/summary') %>");
+$('#rendering_partial').html("<%= j render(:partial => 'main_page/chart') %>");
 
-Morris.Bar({
-  element: 'message-by-each',
-  data: $('#message-by-each').data('messages'),
-  xkey: 'name',
-  ykeys: ['count'],
-  labels: ['Message Count by each member']
-});
+
+<% if @member == 'All' %>
+  Morris.Bar({
+    element: 'message-by-each',
+    data: $('#message-by-each').data('messages'),
+    xkey: 'name',
+    ykeys: ['count'],
+    labels: ['Message Count by each member'],
+    xLabelMargin: 10,
+    xLabelAngle: 90
+  });
+<%end%>
 
 Morris.Bar({
   element: 'message-by-day',
   data: $('#message-by-day').data('messages-per-day'),
   xkey: 'day',
   ykeys: ['count'],
-  labels: ['Message Count per day']
+  labels: ['Message Count per day'],
+  xLabelMargin: 10,
+  xLabelAngle: 90
 });
 
 Morris.Bar({
@@ -25,7 +33,9 @@ Morris.Bar({
   data: $('#message-by-time-slot').data('messages-per-time-slot'),
   xkey: 'slot',
   ykeys: ['count'],
-  labels: ['Message Count per time slot']
+  labels: ['Message Count per time slot'],
+  xLabelMargin: 10,
+  xLabelAngle: 90
 });
 
 Morris.Bar({
@@ -33,5 +43,7 @@ Morris.Bar({
   data: $('#message-by-month').data('messages-per-month'),
   xkey: 'month',
   ykeys: ['count'],
-  labels: ['Message Count per month']
+  labels: ['Message Count per month'],
+  xLabelMargin: 10,
+  xLabelAngle: 90
 });

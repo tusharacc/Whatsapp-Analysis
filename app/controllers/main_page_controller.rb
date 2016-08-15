@@ -98,16 +98,30 @@ class MainPageController < ApplicationController
 
 	def update_message_list
 		people = params['people']
+		@member = people
 		from_dt = params['from-date']
 		to_dt = params['to-date']
-		if people == 'All'
-	    	get_count_per_member
-			get_average_per_day
-			get_average_per_time_slot(from_dt,to_dt)
-			get_per_month
-	    	get_media_omitted
-	    	get_members_added
+		#logger.debug "The from date is #{from_dt}"
+		#logger.debug "The to date is #{to_dt}"
+		
+		if people =="All"
+	    	get_count_per_member(from_dt,to_dt, people)
 	    end
+	    get_summary(from_dt,to_dt, people)
+	    #logger.debug "I am after count per member"
+		get_average_per_day(from_dt,to_dt, people)
+		#logger.debug "I am after count per day"
+		get_average_per_time_slot(from_dt,to_dt, people)
+		#logger.debug "I am after count per time"
+		get_per_month(from_dt,to_dt, people)
+		#logger.debug "I am after count per month"
+	   	get_media_omitted(from_dt,to_dt,people)
+	   	get_members_added(from_dt,to_dt,people)
+	   	get_number_of_times_group_left(from_dt,to_dt,people)
+	   	#logger.debug "The number of time group left #{@group_left}"
+	   	get_number_of_times_group_name_changed(from_dt,to_dt,people)
+	   	get_number_of_times_group_pic_changed(from_dt,to_dt,people)
+	    
     	respond_to do |format|
       		format.js 
       		format.html
@@ -127,25 +141,40 @@ class MainPageController < ApplicationController
     		am_pm = time.scan(/(.+):.+\s(\S+)/)[0][1]
 
     		if from_dt <= read_from_dt and to_dt >= read_from_dt
-	    		if am_pm == 'PM'
-	    			hour = hour + 12.0
-	    		end
-	    		index = hour/4.0
-	    		if index > 0 and index <=1.0
-	    			@time_slot[0]['count'] += 1
-	    		elsif index > 1.0 and index <=2.0
-	    			@time_slot[1]['count'] += 1
-	    		elsif index > 2.0 and index <=3.0
-	    			@time_slot[2]['count'] += 1
-	    		elsif index > 3.0 and index <=4.0
-	    			@time_slot[3]['count'] += 1
-	    		elsif index > 4.0 and index <=5.0
-	    			@time_slot[4]['count'] += 1
-	    		elsif index > 5.0 and index <=6.0
-	    			@time_slot[5]['count'] += 1
-	    		end
+
+    			case name[0]
+    			when 'All'
+    				populate_time_slot(am_pm,hour)
+    			else
+    				#logger.debug "The name that came #{name[0]} & #{hsh['name']}"
+    				if name[0] == hsh['name']
+    					populate_time_slot(am_pm,hour)
+    				end
+    			end
 	    	end
     	end
+    	#file.close
+  	end
+
+  	def populate_time_slot (am_pm,hour)
+  		if am_pm == 'PM'
+			hour = hour + 12.0
+		end
+		index = hour/4.0
+		if index > 0 and index <=1.0
+			@time_slot[0]['count'] += 1
+		elsif index > 1.0 and index <=2.0
+			@time_slot[1]['count'] += 1
+		elsif index > 2.0 and index <=3.0
+			@time_slot[2]['count'] += 1
+		elsif index > 3.0 and index <=4.0
+			@time_slot[3]['count'] += 1
+		elsif index > 4.0 and index <=5.0
+			@time_slot[4]['count'] += 1
+		elsif index > 5.0 and index <=6.0
+			@time_slot[5]['count'] += 1
+		end
+
   	end
 
   	def get_per_month(from_dt,to_dt,*name)
@@ -158,42 +187,56 @@ class MainPageController < ApplicationController
     	#logger.debug "The oldest date  #{latest_date}"
     	#logger.debug "The oldest date  #{oldest_date}"
     	text_hash.each do |text|
-    		read_from_dt = Date.strptime(hsh['date'],'%m/%d/%Y').to_s
-
+    		read_from_dt = Date.strptime(text['date'],'%m/%d/%Y').to_s
+    		#logger.debug "The date is #{text['date']}"
+    		#logger.debug "The date is #{read_from_dt}"
     		if from_dt <= read_from_dt and to_dt >= read_from_dt
-				message_month = Date.strptime(read_from_dt, '%m/%d/%Y').mon 
+				message_month = Date.strptime(text['date'], '%m/%d/%Y').mon 
+				case name[0]
+    			when 'All'
+    				populate_month_slot(message_month)
+    			else
+    				if name[0] == text['name']
+    					populate_month_slot(message_month)
+    				end
+    			end
 	    		#logger.debug "The oldest date  #{message_month}"
-	    		case message_month
-	    		when 1
-	    			@messages_per_month[0]['count'] += 1
-	    		when 2
-	    			@messages_per_month[1]['count'] += 1
-	    		when 3
-	    			@messages_per_month[2]['count'] += 1
-	    		when 4
-	    			@messages_per_month[3]['count'] += 1
-	    		when 5
-	    			@messages_per_month[4]['count'] += 1
-	    		when 6
-	    			@messages_per_month[5]['count'] += 1
-	    		when 7
-	    			@messages_per_month[6]['count'] += 1
-	    		when 8
-	    			@messages_per_month[7]['count'] += 1
-	    		when 9
-	    			@messages_per_month[8]['count'] += 1
-	    		when 10
-	    			@messages_per_month[9]['count'] += 1
-	    		when 11
-	    			@messages_per_month[10]['count'] += 1
-	    		when 12
-	    			@messages_per_month[11]['count'] += 1
-	    		else
-	    			logger.debug "the process failed in month section #{date}"
-	    		end
+	    		
 	    	end
     	end
-    	logger.debug "The number of messages per month  #{@messages_per_month}"
+    	#logger.debug "The number of messages per month  #{@messages_per_month}"
+    	#file.close
+  	end
+  	
+  	def populate_month_slot(message_month)
+  		case message_month
+    		when 1
+    			@messages_per_month[0]['count'] += 1
+    		when 2
+    			@messages_per_month[1]['count'] += 1
+    		when 3
+    			@messages_per_month[2]['count'] += 1
+    		when 4
+    			@messages_per_month[3]['count'] += 1
+    		when 5
+    			@messages_per_month[4]['count'] += 1
+    		when 6
+    			@messages_per_month[5]['count'] += 1
+    		when 7
+    			@messages_per_month[6]['count'] += 1
+    		when 8
+    			@messages_per_month[7]['count'] += 1
+    		when 9
+    			@messages_per_month[8]['count'] += 1
+    		when 10
+    			@messages_per_month[9]['count'] += 1
+    		when 11
+    			@messages_per_month[10]['count'] += 1
+    		when 12
+    			@messages_per_month[11]['count'] += 1
+    		else
+    			logger.debug "the process failed in month section #{date}"
+    		end
   	end
   	
   	def get_count_per_member(from_dt,to_dt,*name)
@@ -223,7 +266,7 @@ class MainPageController < ApplicationController
 				end
 			end
 		end
-
+		#file.close
   	end
 
   	def get_average_per_day(from_dt,to_dt,*name)
@@ -244,24 +287,31 @@ class MainPageController < ApplicationController
 				@messages_per_day.each do |rec|
 					if rec['day'] == day_map[day_num.to_s]
 						not_found = false
-						@messages_per_day[a]['count'] = rec['count'] + 1
+						case name[0]
+    					when 'All'
+    						@messages_per_day[a]['count'] = rec['count'] + 1
+    					else
+    						if name[0] == hsh['name']
+    							@messages_per_day[a]['count'] = rec['count'] + 1
+    						end
+    					end
+						#@messages_per_day[a]['count'] = rec['count'] + 1
 					end
 					a += 1
 				end
 				if not_found
-					@messages_per_day.push({'day'=>day_map[day_num.to_s],'count'=>1})
+					case name[0]
+    				when 'All'
+    					@messages_per_day.push({'day'=>day_map[day_num.to_s],'count'=>1})
+    				else
+    					if name[0] == hsh['name']
+    						@messages_per_day.push({'day'=>day_map[day_num.to_s],'count'=>1})
+    					end
+    				end
 				end
-			end
-			
+			end	
     	end
-    	day_count = {"1"=>0,"2"=>0,"3"=>0,"4"=>0,"5"=>0,"6"=>0,"7"=>0}
-    	(Date.strptime(dt,'%m/%d/%Y')..latest_date).each do |orig_date|
-    		day_count.each do |k,v|
-				if k == orig_date.cwday.to_s
-					day_count[k] = v + 1
-				end
-    		end
-    	end
+    	#file.close
 
     	#logger.debug "the number of messages per day is #{day_count}"
     	#logger.debug "the number of messages per day is #{@messages_per_day}"
@@ -272,7 +322,7 @@ class MainPageController < ApplicationController
 
   	end
 
-  	def get_media_omitted
+  	def get_media_omitted (from_dt,to_dt,*name)
   		count = 0
   		file = File.new(Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt"), "r")
   		#logger.debug "File Name is #{Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt")}"
@@ -280,29 +330,24 @@ class MainPageController < ApplicationController
   			line_split = line.scan(/(\d+\/\d+\/\d+),\s(\d+:\d+\s\w+)\s-\s(.*$)/)
 		    if line_split[0][-1] == "<Media omitted>"
 				#logger.debug 'I am in, what you want to do'
-				count += 1
+				case name[0]
+    			when 'All'
+    				count += 1
+    			else
+    				if name[0] == line_split[0][-1].scan(/(.+):\s.+/) and dt >= from_dt and dt <= to_dt
+    					count += 1
+    				end
+    			end
     		end
 
   		end
 		file.close
 
-  		# count = 0
-  		# if @specific_lines != nil
-	  	# 	@specific_lines.each do |line|
-	  	# 		line_split = line.scan(/(\d+\/\d+\/\d+),\s(\d+:\d+\s\w+)\s-\s(.*$)/)
-	  	# 		if line_split[0][-1] == "<Media omitted>"
-				# 	count += 1
-				# end
-	  	# 	end
-	  	# else
-	  	# 	logger.debug "@specific_lines is nil"
-	  	# end
-
   		@media_added = count
   		#logger.debug "The number of time media was added #{@media_added}"
   	end
 
-  	def get_members_added
+  	def get_members_added (from_dt,to_dt,*name)
   		count = 0
   		file = File.new(Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt"), "r")
   		#logger.debug "File Name is #{Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt")}"
@@ -312,12 +357,124 @@ class MainPageController < ApplicationController
   				if line_split[0].count == 3
   					#logger.debug "The line we are looking at #{line_split[0][-1]}"
   					#logger.debug "The index we are looking at #{line_split[0][-1].index("added")}"
+  					dt = Date.strptime(line_split[0][0],'%m/%d/%Y').to_s
   					if line_split[0][-1].index("added") != nil
-						count += 1
+						case name[0]
+    					when 'All'
+    						if dt >= from_dt and dt <= to_dt
+    							count += 1
+    						end
+    					else
+    						if name[0] == line_split[0][-1].scan(/(.+)\added\s.+/) and dt >= from_dt and dt <= to_dt
+    							count += 1
+    						end
+    					end
 					end
 				end
 			#end
   		end
+  		file.close
   		@members_added = count
+  	end
+
+  	def get_number_of_times_group_pic_changed (from_dt,to_dt,*name)
+  		count = 0
+  		file = File.new(Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt"), "r")
+  		#logger.debug "File Name is #{Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt")}"
+  		file.each do |line|
+  			line_split = line.scan(/(\d+\/\d+\/\d+),\s(\d+:\d+\s\w+)\s-\s(.*$)/)
+  			#if line_split.count != 0 
+  				if line_split[0].count == 3
+  					#logger.debug "The line we are looking at #{line_split[0][-1]}"
+  					#logger.debug "The index we are looking at #{line_split[0][-1].index("added")}"
+  					dt = Date.strptime(line_split[0][0],'%m/%d/%Y').to_s
+  					if line_split[0][-1].index("changed") != nil
+						case name[0]
+    					when 'All'
+    						if dt >= from_dt and dt <= to_dt
+    							count += 1
+    						end
+    					else
+    						if name[0] == line_split[0][-1].scan(/(.+)\schanged\s.+/) and dt >= from_dt and dt <= to_dt
+    							count += 1
+    						end
+    					end
+					end
+				end
+			#end
+  		end
+  		@group_pic_changed = count
+  		file.close
+  	end
+  	def get_number_of_times_group_name_changed (from_dt,to_dt,*name)
+  		count = 0
+  		file = File.new(Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt"), "r")
+  		#logger.debug "File Name is #{Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt")}"
+  		file.each do |line|
+  			line_split = line.scan(/(\d+\/\d+\/\d+),\s(\d+:\d+\s\w+)\s-\s(.*$)/)
+  			#if line_split.count != 0 
+  				if line_split[0].count == 3
+  					#logger.debug "The line we are looking at #{line_split[0][-1]}"
+  					#logger.debug "The index we are looking at #{line_split[0][-1].index("added")}"
+  					dt = Date.strptime(line_split[0][0],'%m/%d/%Y').to_s
+  					if line_split[0][-1].index("changed") != nil
+  						case name[0]
+    					when 'All'
+    						if dt >= from_dt and dt <= to_dt
+    							count += 1
+    						end
+    					else
+    						if name[0] == line_split[0][0] and dt >= from_dt and dt <= to_dt
+    							count += 1
+    						end
+    					end
+						#count += 1
+					end
+				end
+			#end
+  		end
+  		@group_name_changed = count
+  		file.close
+  	end
+  	def get_number_of_times_group_left (from_dt,to_dt,*name)
+  		count = 0
+  		file = File.new(Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt"), "r")
+  		#logger.debug "File Name is #{Rails.root.join('public', 'uploads', session[:file_name]+"_specific.txt")}"
+  		file.each do |line|
+  			line_split = line.scan(/(\d+\/\d+\/\d+),\s(\d+:\d+\s\w+)\s-\s(.*$)/)
+  			#if line_split.count != 0 
+  				if line_split[0].count == 3
+  					#logger.debug "The line we are looking at #{line_split[0][-1]}"
+  					#logger.debug "The index we are looking at #{line_split[0][-1].index("added")}"
+  					dt = Date.strptime(line_split[0][0],'%m/%d/%Y').to_s
+  					if line_split[0][-1].index("left") != nil
+						case name[0]
+    					when 'All'
+    						if dt >= from_dt and dt <= to_dt
+    							count += 1
+    						end
+    					else
+    						if name[0] == line_split[0][-1].scan(/(.+)\sleft/) and dt >= from_dt and dt <= to_dt
+    							count += 1
+    						end
+    					end
+					end
+				end
+			#end
+  		end
+  		@group_left = count
+  		file.close
+  	end
+  	def get_summary (from_dt,to_dt,*name)
+
+  		file = File.read(Rails.root.join('public', 'uploads', session[:file_name]+'_regular.json'))
+    	text_hash = JSON.parse(file)
+    	#read_from_dt = Date.strptime(hsh['date'],'%m/%d/%Y').to_s
+    	case name[0]
+    	when 'All'
+    		@chat_count = text_hash.count
+    	else
+    		@chat_count = text_hash.select {|hsh| hsh["name"] == name[0] and Date.strptime(hsh['date'],'%m/%d/%Y').to_s >= from_dt and Date.strptime(hsh['date'],'%m/%d/%Y').to_s <=to_dt}.count
+    	end
   	end
 end

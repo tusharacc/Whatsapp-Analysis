@@ -1,0 +1,16 @@
+
+	<% if @member == 'All' %>
+		<div class="jumbotron" style="margin:20px 20% 0 20%">
+	      <%= content_tag :div,"",id:"message-by-each",data:{messages:@messages} %>
+	    </div>
+	<%end%>
+    <div class="jumbotron" style="margin:20px 20% 0 20%">
+      <%= content_tag :div,"",id:"message-by-day",data:{messages_per_day:@messages_per_day} %>
+    </div>
+    <div class="jumbotron" style="margin:20px 20% 0 20%">
+      <%= content_tag :div,"",id:"message-by-time-slot",data:{messages_per_time_slot:@time_slot} %>
+    </div>
+    <div class="jumbotron" style="margin:20px 20% 0 20%">
+      <%= content_tag :div,"",id:"message-by-month",data:{messages_per_month:@messages_per_month} %>
+    </div>
+
