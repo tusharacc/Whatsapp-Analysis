@@ -5,10 +5,19 @@
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
   <%= csrf_meta_tags %>
+  <style>
+		@import 'https://fonts.googleapis.com/css?family=Baloo+Chettan';
+  </style>
 </head>
 <body>
 
 <%= yield %>
+
+<footer class="footer" style="position: fixed;width: 100%;bottom: 0;font-family: 'Baloo Chettan', cursive;">
+  <div class="container" style="background-color:black;">
+    <p class="text-muted text-center" style="color:white"><a href="https://github.com/tusharacc">Tushar Saurabh</a></p>
+  </div>
+</footer>
 
 </body>
 </html>
