@@ -17,3 +17,5 @@
 /tmp
 
 /config/secrets.yml
+/public/uploads/*_regular.json
+/public/uploads/*_specific.txt
